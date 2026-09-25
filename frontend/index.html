@@ -1,0 +1,299 @@
+```html
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Result Search</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+        }
+
+        button {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(102, 126, 234, 0.4);
+        }
+
+        .student-card {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .student-card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .student-card p {
+            margin: 8px 0;
+            color: #444;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #eef0ff;
+        }
+
+        .not-found {
+            text-align: center;
+            color: #d63031;
+            background: #ffeaea;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+
+            .container {
+                padding: 25px 18px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th,
+            td {
+                padding: 9px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🎓 Student Result Portal</h1>
+
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="register_number"
+                placeholder="Enter Register Number">
+
+            <button onclick="searchResult()">
+                Search Result
+            </button>
+
+        </div>
+
+        <div id="result"></div>
+
+    </div>
+
+
+    <script>
+
+        async function searchResult() {
+
+            let registerNumber =
+                document.getElementById("register_number").value.trim();
+
+            if (registerNumber === "") {
+
+                document.getElementById("result").innerHTML =
+                    '<div class="not-found">Please enter Register Number</div>';
+
+                return;
+            }
+
+            try {
+
+                let response =
+                    await fetch("http://127.0.0.1:8000/results");
+
+                let students =
+                    await response.json();
+
+                let student =
+                    students.find(
+                        student =>
+                            student.register_number === registerNumber
+                    );
+
+
+                if (student) {
+
+                    let output = `
+
+                        <div class="student-card">
+
+                            <h2>${student.student_name}</h2>
+
+                            <p>
+                                <strong>Register Number:</strong>
+                                ${student.register_number}
+                            </p>
+
+                            <p>
+                                <strong>Department:</strong>
+                                ${student.department}
+                            </p>
+
+                            <table>
+
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Grade</th>
+                                </tr>
+
+                    `;
+
+
+                    student.subjects.forEach(subject => {
+
+                        output += `
+
+                            <tr>
+                                <td>${subject.subject_name}</td>
+                                <td>${subject.grade}</td>
+                            </tr>
+
+                        `;
+
+                    });
+
+
+                    output += `
+
+                            </table>
+
+                        </div>
+
+                    `;
+
+
+                    document.getElementById("result").innerHTML =
+                        output;
+
+                }
+
+                else {
+
+                    document.getElementById("result").innerHTML =
+                        '<div class="not-found">Student Not Found</div>';
+
+                }
+
+            }
+
+            catch (error) {
+
+                document.getElementById("result").innerHTML =
+                    '<div class="not-found">Unable to connect to server</div>';
+
+                console.error(error);
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
+```
