@@ -61,7 +61,7 @@ def get_results():
 
 
         {
-            "student_name": "A Sharath",
+            "student_name": "Arun Kumar",
             "register_number": "22CS103",
             "department": "CSE",
             "subjects": [
